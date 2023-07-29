@@ -1,0 +1,114 @@
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class MainActivity extends AppCompatActivity {
+
+    private TextView questionTextView;
+    private RadioGroup radioGroup;
+    private Button nextButton;
+    private int currentQuestionIndex = 0;
+    private int score = 0;
+    private List<Question> questions;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        questionTextView = findViewById(R.id.questionTextView);
+        radioGroup = findViewById(R.id.radioGroup);
+        nextButton = findViewById(R.id.nextButton);
+
+        // Initialize questions list (You can replace these with your own questions)
+        questions = new ArrayList<>();
+        questions.add(new Question("What is the capital of France?", "London", "Berlin", "Paris", "Madrid", "Paris"));
+        questions.add(new Question("What is 2 + 2?", "3", "4", "5", "6", "4"));
+
+        showQuestion();
+
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkAnswer();
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.size()) {
+                    showQuestion();
+                } else {
+                    showScore();
+                }
+            }
+        });
+    }
+
+    private void showQuestion() {
+        Question currentQuestion = questions.get(currentQuestionIndex);
+        questionTextView.setText(currentQuestion.getQuestion());
+        radioGroup.clearCheck();
+
+        // Set answer choices
+        RadioButton[] radioButtons = new RadioButton[4];
+        radioButtons[0] = findViewById(R.id.choice1);
+        radioButtons[1] = findViewById(R.id.choice2);
+        radioButtons[2] = findViewById(R.id.choice3);
+        radioButtons[3] = findViewById(R.id.choice4);
+
+        for (int i = 0; i < 4; i++) {
+            radioButtons[i].setText(currentQuestion.getChoices().get(i));
+        }
+    }
+
+    private void checkAnswer() {
+        int selectedRadioButtonId = radioGroup.getCheckedRadioButtonId();
+        if (selectedRadioButtonId != -1) {
+            RadioButton selectedRadioButton = findViewById(selectedRadioButtonId);
+            Question currentQuestion = questions.get(currentQuestionIndex);
+            String userAnswer = selectedRadioButton.getText().toString();
+            if (userAnswer.equals(currentQuestion.getCorrectAnswer())) {
+                score++;
+            }
+        }
+    }
+
+    private void showScore() {
+        Toast.makeText(this, "Your score: " + score + " out of " + questions.size(), Toast.LENGTH_LONG).show();
+        // Optionally, you can show a result screen with the user's score and an option to restart the quiz.
+    }
+
+    // Question class to represent each question
+    private static class Question {
+        private String question;
+        private List<String> choices;
+        private String correctAnswer;
+
+        public Question(String question, String choice1, String choice2, String choice3, String choice4, String correctAnswer) {
+            this.question = question;
+            this.choices = new ArrayList<>();
+            choices.add(choice1);
+            choices.add(choice2);
+            choices.add(choice3);
+            choices.add(choice4);
+            this.correctAnswer = correctAnswer;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public List<String> getChoices() {
+            return choices;
+        }
+
+        public String getCorrectAnswer() {
+            return correctAnswer;
+        }
+    }
+}
